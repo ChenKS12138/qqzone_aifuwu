@@ -21,8 +21,10 @@ const login = async (u,p)=>{
     await console.log('Maybe you need to scan the QR code at first time ,please check screenshot.png ');
     setInterval(() => {
         page.screenshot({path:'./check.png'});
+    }, 1000);
+    setInterval(() => {
         page.reload();
-    }, 5000);
+    }, 30000);
     await page.waitFor('.qz-main',{timeout:100000});
     const cookie= await page.cookies();
     return {
