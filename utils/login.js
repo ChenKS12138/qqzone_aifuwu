@@ -17,10 +17,14 @@ const login = async (u,p)=>{
     await frame.type('#u',u);
     await frame.type('#p',p);
     await frame.click('#login_button');
-    await page.waitFor(1500);
-    const cookies= await page.cookies();
-    // console.log(cookies);
-    browser.close();
-    return cookies;
+    await page.screenshot({path: './screenshot.png'});
+    await console.log('Maybe you need to scan the QR code at first time ,please check screenshot.png ');
+    await page.waitFor('.qz-main',{timeout:100000});
+    const cookie= await page.cookies();
+    return {
+        cookie:cookie,
+        browser:browser,
+        page:page
+    };  
 };
 module.exports=login;
