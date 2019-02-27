@@ -9,6 +9,7 @@
   "author": "chen",
   "license": "MIT",
   "dependencies": {
+    "blink-diff": "^1.0.13",
     "express": "^4.16.4",
     "puppeteer": "^1.12.2",
     "puppeteer-core": "^1.12.2",

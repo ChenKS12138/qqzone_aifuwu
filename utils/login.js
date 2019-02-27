@@ -21,7 +21,7 @@ const login = async (u,p)=>{
     await console.log('Maybe you need to scan the QR code at first time ,please check screenshot.png ');
     setInterval(() => {
         page.screenshot({path:'./check.png'});
-    }, 1000);
+    }, 10000);
     setInterval(() => {
         page.reload();
     }, 30000);
