@@ -1,29 +1,25 @@
+const resemble = require('resemblejs-node');
+const fs = require('fs');
+const async = require('async');
+const diff = async (rawDir, sourceImg, Data) => {
 
-const BlinkDiff = require('blink-diff');
-const fs=require('fs');
-
-const diff= async (imgDir,paoImgPath) => {
-    fs.readdir(imgDir,(err,files) =>{
-        files.map((val,index) => {
-            var diff = new BlinkDiff({
-                imageAPath: imgDir+'/'+val, // Use file-path
-                imageBPath: paoImgPath,
-
-                thresholdType: BlinkDiff.THRESHOLD_PERCENT,
-                threshold: 0.01, // 1% threshold
-
-                // imageOutputPath: ''
+  fs.readdir(rawDir, (err, files) => {
+      console.log('start comparing....');
+      let temp = new Array();
+      async.map(files,(val,callback) => {
+        let difference = resemble(rawDir + '/' + val).compareTo(sourceImg).ignoreColors().onComplete(function (result) {
+              if (parseInt(result.misMatchPercentage) < 10) {
+                // console.log(result);
+                console.log(val);
+                temp.push(val);
+              }
+              callback(null, val);
             });
-            diff.run(function (error, result) {
-                if (error) {
-                    throw error;
-                } else {
-                    console.log(diff.hasPassed(result.code) ? '通过' : '失败');
-                    console.log('总像素:' + result.dimension);
-                    console.log('发现:' + result.differences + ' 差异.');
-                }
-            })
-        })
-    })
+        },(err,result) => {
+          console.log('compare complete!');
+          Data=temp;
+          console.log(Data);
+        });
+  })
 }
-module.exports=diff;
+module.exports = diff;
