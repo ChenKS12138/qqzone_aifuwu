@@ -6,6 +6,7 @@ const getGTK = require('./utils/getGTK.js');
 const async = require('async');
 const images = require('images');
 const resemble = require('resemblejs-node');
+const time = require('./utils/time.js');
 
 const app = express();
 const userinfo = JSON.parse(fs.readFileSync('./config.json').toString());
@@ -15,6 +16,7 @@ let responseData = {
     ret: 200,
     desc: 'success',
     data: {
+        currentTime: 0,
         count: 0,
         time: [],
         base64encode: []
@@ -129,6 +131,7 @@ login.then(login => {
                         ret: 201,
                         desc: 'COLLECTING DATA',
                         data: {
+                            currentTime: 0,
                             count: 0,
                             time: [],
                             base64encode: []
@@ -162,6 +165,7 @@ login.then(login => {
 
 app.use('/img', express.static('./temp'));
 app.use('/', (req, res) => {
+    responseData.data.currentTime = time();
     res.json(responseData);
 })
 app.listen(3001);

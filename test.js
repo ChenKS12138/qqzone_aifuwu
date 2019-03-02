@@ -1,10 +1,10 @@
-const request = require("request");
+// const request = require("request");
 // const resemble = require("resemblejs-node");
 // const images = require("images");
-const fs = require("fs");
-const async = require('async');
-const express = require('express');
-const path =require('path');
+// const fs = require("fs");
+// const async = require('async');
+// const express = require('express');
+// const path = require('path');
 // const url ='https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1551371823197&di=2de1eceaab13e79e9d770e5dec509478&imgtype=0&src=http%3A%2F%2Fb.hiphotos.baidu.com%2Fzhidao%2Fwh%253D450%252C600%2Fsign%3Db7a5aee7dab44aed591bb6e0862cab37%2F738b4710b912c8fcf2735b60fc039245d788219e.jpg';
 // const url2=['http://b18.photo.store.qq.com/psb?/V14XRS3d4HjYJC/Dt.KcagVRj4sJRIzosQB9n1UKD.CdtguLvkThcamgIM!/b/dBIAAAAAAAAA&bo=wAMABcADAAURECc!','http://b19.photo.store.qq.com/psb?/V14XRS3d4HjYJC/NjxGtmq..W60u2QwHa60zE5P72MGo6I0ZK6Us518pps!/b/dBMAAAAAAAAA&bo=OAR9BzgEfQcRECc!'];
 
@@ -79,6 +79,12 @@ const path =require('path');
 //         })
 //     }
 // ], (err, result) => {})
-const app= express();
-app.use(express.static('./PleaseScan.png'));
-app.listen(3002);
+// const app= express();
+// app.use(express.static('./PleaseScan.png'));
+// app.listen(3002);
+
+const time = () => {
+  let date = new Date();
+  return parseInt(date.getTime() / 1000);
+}
+console.log(time());
