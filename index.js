@@ -16,7 +16,7 @@ let responseData = {
     desc: 'success',
     data: {
         count: 0,
-        time:[],
+        time: [],
         base64encode: []
     }
 };
@@ -27,7 +27,7 @@ login.then(login => {
     let cookie = login.cookie;
     const page = login.page;
     const browser = login.browser;
-    
+
 
     let p_skey = cookie.map((val) => {
         if (val.name === 'p_skey') {
@@ -61,26 +61,26 @@ login.then(login => {
                         return val.pic_id;
                     });
                     return {
-                      pic:temp,
-                      time:val.created_time,
+                        pic: temp,
+                        time: val.created_time,
                     };
                 }
             });
-            let temp=[];
+            let temp = [];
             info.forEach((val) => {
 
-              if(val&&val.pic){
-                val.pic.forEach((value) => {
-                  if(value){
-                    temp.push({
-                      pic:value,
-                      time:val.time
+                if (val && val.pic) {
+                    val.pic.forEach((value) => {
+                        if (value) {
+                            temp.push({
+                                pic: value,
+                                time: val.time
+                            })
+                        }
                     })
-                  }
-                })
-              }
+                }
             })
-            info=temp;
+            info = temp;
             // console.log(info);
             console.log('start');
 
@@ -99,8 +99,8 @@ login.then(login => {
                             }
                         }, (err, response, buffer) => {
                             callback(null, {
-                              buffer:buffer,
-                              time:val.time
+                                buffer: buffer,
+                                time: val.time
                             });
                         });
                     }, (err, result) => {
@@ -112,14 +112,14 @@ login.then(login => {
                     async.map(buffers.filter((val) => {
                         return val.buffer;
                     }), (val, callback) => {
-                        callback(null,{
-                          png:images(val.buffer).resize(640, 640).encode('png'),
-                          time:val.time
+                        callback(null, {
+                            png: images(val.buffer).resize(640, 640).encode('png'),
+                            time: val.time
                         });
                     }, (err, result) => {
                         console.log('transcoded!');
                         cb(null, {
-                          pngs:result
+                            pngs: result
                         });
                     })
 
@@ -130,8 +130,8 @@ login.then(login => {
                         desc: 'COLLECTING DATA',
                         data: {
                             count: 0,
-                            base64encode: [],
-                            time:[]
+                            time: [],
+                            base64encode: []
                         },
                     }
                     async.map(pngs.pngs, (val, callback) => {
@@ -140,7 +140,7 @@ login.then(login => {
                             if (parseInt(result.misMatchPercentage) <= 2) {
                                 console.log(val.png.toString('base64').slice(0, 17));
                                 responseData.data.count++;
-                                responseData.data.base64encode.push(val.png.toString('base64'));
+                                // responseData.data.base64encode.push());
                                 responseData.data.time.push(val.time);
                             } else {}
                             callback(null, null);
