@@ -4,7 +4,8 @@
   "description": "sprider",
   "main": "index.js",
   "scripts": {
-    "test": "node index.js"
+    "test": "node test.js",
+    "all": "node index.js"
   },
   "author": "chen",
   "license": "MIT",
