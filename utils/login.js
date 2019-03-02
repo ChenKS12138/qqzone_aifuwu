@@ -1,6 +1,4 @@
 const puppeteer = require('puppeteer');
-const express = require('express');
-const app = express();
 const login = async (u, p, isScan) => {
     const browser = await puppeteer.launch({
         headless: true,
@@ -20,19 +18,19 @@ const login = async (u, p, isScan) => {
         await frame.type('#u', u);
         await frame.type('#p', p);
         await frame.click('#login_button');
-        await page.screenshot({
-            path: './screenshot.png'
-        });
+        // await page.screenshot({
+        //     path: './screenshot.png'
+        // });
         await console.log('Maybe you need to scan the QR code at first time ,please check screenshot.png ');
-        setTimeout(() => {
-            page.screenshot({
-                path: './check.png'
-            });
-        }, 2000);
+        // setTimeout(() => {
+        //     page.screenshot({
+        //         path: './check.png'
+        //     });
+        // }, 2000);
     } else {
-        await console.log('Please scan QRcode');
+        await console.log('Please scan QRcode at http://localhost:3001/scan.png');
         page.screenshot({
-            path: './PleaseScan.png'
+            path: './temp/scan.png'
         })
     }
     await page.waitFor('.qz-main', {

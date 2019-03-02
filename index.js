@@ -11,13 +11,23 @@ const app = express();
 const userinfo = JSON.parse(fs.readFileSync('./config.json').toString());
 let login = Login(userinfo.u, userinfo.p, true);
 
+let responseData = {
+    ret: 200,
+    desc: 'success',
+    data: {
+        count: 0,
+        time:[],
+        base64encode: []
+    }
+};
+
 login.then(login => {
     console.log('Login success!');
 
     let cookie = login.cookie;
     const page = login.page;
     const browser = login.browser;
-    let Data = [];
+    
 
     let p_skey = cookie.map((val) => {
         if (val.name === 'p_skey') {
@@ -43,25 +53,42 @@ login.then(login => {
     const update = () => {
         request(options, (err, response) => {
             let data = JSON.parse(response.body.slice(17, -2));
+            // console.log(data);
             const msg = data.msglist;
-            img = msg.map(function (val, index, arr) {
+            info = msg.map(function (val, index, arr) {
                 if (val.pic) {
                     let temp = val.pic.map(function (val, index) {
                         return val.pic_id;
                     });
-                    return temp;
+                    return {
+                      pic:temp,
+                      time:val.created_time,
+                    };
                 }
             });
-            img = img.toString().split(',');
+            let temp=[];
+            info.forEach((val) => {
+
+              if(val&&val.pic){
+                val.pic.forEach((value) => {
+                  if(value){
+                    temp.push({
+                      pic:value,
+                      time:val.time
+                    })
+                  }
+                })
+              }
+            })
+            info=temp;
+            // console.log(info);
             console.log('start');
 
             async.waterfall([
                 (cb) => {
-                    async.map(img.filter((val) => {
-                        return val;
-                    }), (val, callback) => {
+                    async.map(info, (val, callback) => {
                         request({
-                            url: val,
+                            url: val.pic,
                             method: "GET",
                             charset: "utf-8",
                             encoding: null,
@@ -71,59 +98,71 @@ login.then(login => {
                                 "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
                             }
                         }, (err, response, buffer) => {
-                            callback(null, buffer);
-                        })
+                            callback(null, {
+                              buffer:buffer,
+                              time:val.time
+                            });
+                        });
                     }, (err, result) => {
-                        console.log('img_buffer geted!');
+                        console.log('buffer fetched!');
                         cb(null, result);
-                    })
+                    });
                 },
                 (buffers, cb) => {
                     async.map(buffers.filter((val) => {
-                        return val;
+                        return val.buffer;
                     }), (val, callback) => {
-                        callback(null, images(val).resize(640, 640).encode('png'));
+                        callback(null,{
+                          png:images(val.buffer).resize(640, 640).encode('png'),
+                          time:val.time
+                        });
                     }, (err, result) => {
                         console.log('transcoded!');
-                        cb(null, result);
+                        cb(null, {
+                          pngs:result
+                        });
                     })
 
                 },
                 (pngs, cb) => {
-                    // console.log(pngs);
-                    async.map(pngs, (val, callback) => {
+                    responseData = {
+                        ret: 201,
+                        desc: 'COLLECTING DATA',
+                        data: {
+                            count: 0,
+                            base64encode: [],
+                            time:[]
+                        },
+                    }
+                    async.map(pngs.pngs, (val, callback) => {
                         console.log('comparing.....');
-                        resemble(val).compareTo('./res/pao.png').onComplete((result) => {
+                        resemble(val.png).compareTo('./res/pao.png').onComplete((result) => {
                             if (parseInt(result.misMatchPercentage) <= 2) {
-                                console.log(val);
-                                Data.push(1);
+                                console.log(val.png.toString('base64').slice(0, 17));
+                                responseData.data.count++;
+                                responseData.data.base64encode.push(val.png.toString('base64'));
+                                responseData.data.time.push(val.time);
                             } else {}
-                        }, (err, result) => {
-                            console.log('compared!');
-                            cb(null, result);
+                            callback(null, null);
                         });
+                    }, (err, result) => {
+                        console.log('compared!');
+                        responseData.ret = 200;
+                        responseData.desc = "success";
                     })
                 }
             ], (err, result) => {})
 
+
         });
     }
     update();
-    setInterval(updated, 60000);
-
-    app.use('*', (req, res) => {
-        res.json({
-            ret: 200,
-            desc: 'success',
-            data: Data
-        });
-    })
-    app.listen(3001);
-
-
-
-
-
-
-
+    setInterval(update, 300000);
 });
+
+app.use('/img', express.static('./temp'));
+app.use('/', (req, res) => {
+    res.json(responseData);
+})
+app.listen(3001);
+console.log('SERVER START!');
