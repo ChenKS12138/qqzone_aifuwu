@@ -17,6 +17,6 @@
     "puppeteer-core": "^1.12.2",
     "request": "^2.88.0",
     "resemblejs": "^3.0.2",
-    "resemblejs-node": "^1.0.0",
+    "resemblejs-node": "^1.0.0"
   }
 }
