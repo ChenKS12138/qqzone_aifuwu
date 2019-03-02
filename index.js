@@ -19,7 +19,7 @@ let responseData = {
         currentTime: 0,
         count: 0,
         time: [],
-        base64encode: []
+        url: []
     }
 };
 
@@ -102,7 +102,8 @@ login.then(login => {
                         }, (err, response, buffer) => {
                             callback(null, {
                                 buffer: buffer,
-                                time: val.time
+                                time: val.time,
+                                url: val.pic
                             });
                         });
                     }, (err, result) => {
@@ -116,7 +117,8 @@ login.then(login => {
                     }), (val, callback) => {
                         callback(null, {
                             png: images(val.buffer).resize(640, 640).encode('png'),
-                            time: val.time
+                            time: val.time,
+                            url: val.url
                         });
                     }, (err, result) => {
                         console.log('transcoded!');
@@ -134,7 +136,7 @@ login.then(login => {
                             currentTime: 0,
                             count: 0,
                             time: [],
-                            base64encode: []
+                            url: []
                         },
                     }
                     async.map(pngs.pngs, (val, callback) => {
@@ -145,6 +147,7 @@ login.then(login => {
                                 responseData.data.count++;
                                 // responseData.data.base64encode.push());
                                 responseData.data.time.push(val.time);
+                                responseData.data.url.push(val.url);
                             } else {}
                             callback(null, null);
                         });

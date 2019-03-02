@@ -1,4 +1,8 @@
-// const request = require("request");
+// import {
+//   request
+// } from "https";
+
+const request = require("request");
 // const resemble = require("resemblejs-node");
 // const images = require("images");
 // const fs = require("fs");
@@ -83,8 +87,16 @@
 // app.use(express.static('./PleaseScan.png'));
 // app.listen(3002);
 
-const time = () => {
-  let date = new Date();
-  return parseInt(date.getTime() / 1000);
-}
-console.log(time());
+request({
+  url: 'http://b385.photo.store.qq.com/psb?/V14XRS3d4HjYJC/dfLasIShMUq3c*ddWMeL6Y0QUhAzII4jzCM0bhn2a6Y!/b/dIEBAAAAAAAA&bo=9AE5AfQBOQERECc!',
+  method: "GET",
+  charset: "utf-8",
+  encoding: null,
+  headers: {
+    accept: "*/*",
+    "accept-language": "zh-CN,zh;q=0.9",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
+  }
+}, (err, response, buffer) => {
+  console.log(response.toJSON().request.uri.href);
+})
