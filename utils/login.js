@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer');
-const login = async (u, p, isScan) => {
+const login = async (isScan,u=NULl, p=NULl) => {
     const browser = await puppeteer.launch({
         headless: true,
         // executablePath: 'C:\\Users\\74992\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe'
@@ -18,10 +18,10 @@ const login = async (u, p, isScan) => {
         await frame.type('#u', u);
         await frame.type('#p', p);
         await frame.click('#login_button');
-        // await page.screenshot({
-        //     path: './screenshot.png'
-        // });
-        await console.log('Maybe you need to scan the QR code at first time ,please check screenshot.png ');
+        await page.screenshot({
+            path: './temp/scan.png'
+        });
+        await console.log('It could be possbile that you need to scan the QRcode at "./temp/scan.png" if log in by U&P too frequently');
         // setTimeout(() => {
         //     page.screenshot({
         //         path: './check.png'

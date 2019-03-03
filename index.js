@@ -10,7 +10,7 @@ const time = require('./utils/time.js');
 
 const app = express();
 const userinfo = JSON.parse(fs.readFileSync('./config.json').toString());
-let login = Login(userinfo.u, userinfo.p, true);
+let login = Login(true,userinfo.u, userinfo.p);
 
 let responseData = {
     ret: 200,
