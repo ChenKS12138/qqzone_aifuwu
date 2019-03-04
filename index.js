@@ -153,6 +153,7 @@ login.then(login => {
                         });
                     }, (err, result) => {
                         console.log('compared!');
+                        console.log(time())
                         responseData.ret = 200;
                         responseData.desc = "success";
                     })
