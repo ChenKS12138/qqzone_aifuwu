@@ -17,7 +17,6 @@ let responseData = {
     ret: 200,
     desc: 'success',
     data: {
-        serviceStartTime:serviceStartTime,
         currentTime: 0,
         count: 0,
         time: [],
@@ -85,7 +84,6 @@ login.then(login => {
                 }
             })
             info = temp;
-            // console.log(info);
             console.log('start');
 
             async.waterfall([
@@ -134,7 +132,6 @@ login.then(login => {
                     responseData = {
                         ret: 201,
                         desc: 'COLLECTING DATA',
-                        serviceStartTime:serviceStartTime,
                         data: {
                             currentTime: 0,
                             count: 0,
@@ -173,6 +170,7 @@ login.then(login => {
 app.use('/img', express.static('./temp'));
 app.use('/', (req, res) => {
     responseData.data.currentTime = time();
+    responseData.data.serviceStartTime=serviceStartTime;
     res.json(responseData);
 })
 app.listen(3001);
