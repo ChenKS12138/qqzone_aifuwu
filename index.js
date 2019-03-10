@@ -4,9 +4,9 @@ const express = require('express');
 const Login = require('./utils/login.js');
 const getGTK = require('./utils/getGTK.js');
 const async = require('async');
-const images = require('images');
 const resemble = require('resemblejs-node');
 const time = require('./utils/time.js');
+const sharp=require('sharp');
 
 const app = express();
 const userinfo = JSON.parse(fs.readFileSync('./config.json').toString());
@@ -56,7 +56,6 @@ login.then(login => {
     const update = () => {
         request(options, (err, response) => {
             let data = JSON.parse(response.body.slice(17, -2));
-            // console.log(data);
             const msg = data.msglist;
             info = msg.map(function (val, index, arr) {
                 if (val.pic) {
@@ -108,25 +107,21 @@ login.then(login => {
                         });
                     }, (err, result) => {
                         console.log('buffer fetched!');
-                        cb(null, result);
+                        cb(null, result);//result 包含了 buffer time url 
                     });
-                },
-                (buffers, cb) => {
-                    async.map(buffers.filter((val) => {
-                        return val.buffer;
-                    }), (val, callback) => {
-                        callback(null, {
-                            png: images(val.buffer).resize(640, 640).encode('png'),
-                            time: val.time,
-                            url: val.url
+                },(buffers,cb) => {
+                    async.map(buffers,(val,callback) => {
+                      sharp(val.buffer).resize(640,640).png().toBuffer().then(res => {
+                        callback(null,{
+                          png:res,
+                          time:val.time,
+                          url:val.url
                         });
-                    }, (err, result) => {
-                        console.log('transcoded!');
-                        cb(null, {
-                            pngs: result
-                        });
+                      })
+                    },(err,result) => {
+                      console.log('transcoded')
+                      cb(null,result);
                     })
-
                 },
                 (pngs, cb) => {
                     responseData = {
@@ -139,13 +134,12 @@ login.then(login => {
                             url: []
                         },
                     }
-                    async.map(pngs.pngs, (val, callback) => {
+                    async.map(pngs, (val, callback) => {
                         console.log('comparing.....');
                         resemble(val.png).compareTo('./res/pao.png').onComplete((result) => {
                             if (parseInt(result.misMatchPercentage) <= 2) {
                                 console.log(val.png.toString('base64').slice(0, 17));
                                 responseData.data.count++;
-                                // responseData.data.base64encode.push());
                                 responseData.data.time.push(val.time);
                                 responseData.data.url.push(val.url);
                             } else {}
