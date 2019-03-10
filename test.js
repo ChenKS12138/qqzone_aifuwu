@@ -13,5 +13,6 @@ const options = {
   }
 };
 request(options,async (err,response,buffer) => {
+  console.log(Buffer.isBuffer(buffer))
   sharp(buffer).resize(640,640).png().toBuffer().then(res => console.log(res))
 })

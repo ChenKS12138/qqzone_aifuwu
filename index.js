@@ -99,19 +99,25 @@ login.then(login => {
                                 "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
                             }
                         }, (err, response, buffer) => {
-                            callback(null, {
-                                buffer: buffer,
-                                time: val.time,
-                                url: val.pic
-                            });
+                            if(Buffer.isBuffer(buffer)){
+                                callback(null, {
+                                    buffer: buffer,
+                                    time: val.time,
+                                    url: val.pic
+                                });
+                            }
+                            else{
+                                callback(null,null);
+                            }
                         });
                     }, (err, result) => {
+                        result = result.filter(val =>{if(val === null){return false}else{return true}});
                         console.log('buffer fetched!');
                         cb(null, result);//result 包含了 buffer time url 
                     });
                 },(buffers,cb) => {
                     async.map(buffers,(val,callback) => {
-                      sharp(val.buffer).resize(640,640).png().toBuffer().then(res => {
+                      sharp(val.buffer).resize(640).png().toBuffer().then(res => {
                         callback(null,{
                           png:res,
                           time:val.time,
@@ -136,9 +142,11 @@ login.then(login => {
                     }
                     async.map(pngs, (val, callback) => {
                         console.log('comparing.....');
-                        resemble(val.png).compareTo('./res/pao.png').onComplete((result) => {
-                            if (parseInt(result.misMatchPercentage) <= 2) {
+                        // fs.writeFileSync('./temp/'+val.png.toString('base64').slice(0,17)+'.png',val.png);//测试使用的代码
+                        resemble(val.png).compareTo('./res/pao.png').scaleToSameSize().onComplete((result) => {
+                            if (parseInt(result.misMatchPercentage) <= 8) {
                                 console.log(val.png.toString('base64').slice(0, 17));
+                                console.log(result.misMatchPercentage);
                                 responseData.data.count++;
                                 responseData.data.time.push(val.time);
                                 responseData.data.url.push(val.url);
