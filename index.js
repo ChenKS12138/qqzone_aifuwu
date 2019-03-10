@@ -18,6 +18,7 @@ let responseData = {
     desc: 'success',
     data: {
         currentTime: 0,
+        lastUpdateTime:0,
         count: 0,
         time: [],
         url: []
@@ -135,6 +136,7 @@ login.then(login => {
                         desc: 'COLLECTING DATA',
                         data: {
                             currentTime: 0,
+                            lastUpdateTime:time(),
                             count: 0,
                             time: [],
                             url: []
@@ -155,7 +157,8 @@ login.then(login => {
                         });
                     }, (err, result) => {
                         console.log('compared!');
-                        console.log(time())
+                        console.log(time());
+                        responseData.lastUpdateTime=time();
                         responseData.ret = 200;
                         responseData.desc = "success";
                     })
