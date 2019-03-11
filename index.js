@@ -3,6 +3,8 @@ const fs = require('fs');
 const express = require('express');
 const Login = require('./utils/login.js');
 const getGTK = require('./utils/getGTK.js');
+const p_skey= require('./utils/p_skey.js');
+const cookieString = require('./utils/cookieString.js');
 const async = require('async');
 const resemble = require('resemblejs-node');
 const time = require('./utils/time.js');
@@ -32,24 +34,15 @@ login.then(login => {
     const page = login.page;
     const browser = login.browser;
 
-
-    let p_skey = cookie.map((val) => {
-        if (val.name === 'p_skey') {
-            return val.value;
-        }
-    }).toString().split(',').join('');
-    let cookieString = cookie.map((val) => {
-        return val.name + "=" + val.value + ";";
-    }).toString().split(',').join('');
-    let url_shuoshuo = "https://user.qzone.qq.com/proxy/domain/taotao.qq.com/cgi-bin/emotion_cgi_msglist_v6?uin=2563280140&ftype=0&sort=0&pos=0&num=20&replynum=100&g_tk=" + getGTK(p_skey) + "&callback=_preloadCallback&code_version=1&format=jsonp&need_private_comment=1&g_tk=" + getGTK(p_skey);
+    const getShuoshuoUrl = (qid = 2563280140) => {return `https://user.qzone.qq.com/proxy/domain/taotao.qq.com/cgi-bin/emotion_cgi_msglist_v6?uin=${qid}&ftype=0&sort=0&pos=0&num=20&replynum=100&g_tk=` + getGTK(p_skey(cookie)) + "&callback=_preloadCallback&code_version=1&format=jsonp&need_private_comment=1&g_tk=" + getGTK(p_skey(cookie))}
     const options = {
-        url: url_shuoshuo,
+        url: getShuoshuoUrl(2563280140),
         method: 'GET',
         charset: "utf-8",
         headers: {
             'accept': '*/*',
             'accept-language': 'zh-CN,zh;q=0.9',
-            'cookie': cookieString,
+            'cookie': cookieString(cookie),
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
         }
     };
