@@ -33,10 +33,9 @@ login.then(login => {
     let cookie = login.cookie;
     const page = login.page;
     const browser = login.browser;
+    const getShuoshuoUrl = (qid = 2563280140) => {return `https://user.qzone.qq.com/proxy/domain/taotao.qq.com/cgi-bin/emotion_cgi_msglist_v6?uin=${qid}&ftype=0&sort=0&pos=0&num=20&replynum=100&g_tk=` + getGTK(p_skey(cookie)) + "&callback=_preloadCallback&code_version=1&format=jsonp&need_private_comment=1&g_tk=" + getGTK(p_skey(cookie))};
 
-    const getShuoshuoUrl = (qid = 2563280140) => {return `https://user.qzone.qq.com/proxy/domain/taotao.qq.com/cgi-bin/emotion_cgi_msglist_v6?uin=${qid}&ftype=0&sort=0&pos=0&num=20&replynum=100&g_tk=` + getGTK(p_skey(cookie)) + "&callback=_preloadCallback&code_version=1&format=jsonp&need_private_comment=1&g_tk=" + getGTK(p_skey(cookie))}
     const options = {
-        url: getShuoshuoUrl(2563280140),
         method: 'GET',
         charset: "utf-8",
         headers: {
@@ -48,117 +47,136 @@ login.then(login => {
     };
 
     const update = () => {
-        request(options, (err, response) => {
-            let data = JSON.parse(response.body.slice(17, -2));
-            const msg = data.msglist;
-            info = msg.map(function (val, index, arr) {
-                if (val.pic) {
-                    let temp = val.pic.map(function (val, index) {
-                        return val.pic_id;
-                    });
-                    return {
-                        pic: temp,
-                        time: val.created_time,
-                    };
-                }
-            });
-            let temp = [];
-            info.forEach((val) => {
-
-                if (val && val.pic) {
-                    val.pic.forEach((value) => {
-                        if (value) {
-                            temp.push({
-                                pic: value,
-                                time: val.time
-                            })
-                        }
-                    })
-                }
-            })
-            info = temp;
-            console.log('start');
-
-            async.waterfall([
-                (cb) => {
-                    async.map(info, (val, callback) => {
-                        request({
-                            url: val.pic,
-                            method: "GET",
-                            charset: "utf-8",
-                            encoding: null,
-                            headers: {
-                                accept: "*/*",
-                                "accept-language": "zh-CN,zh;q=0.9",
-                                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
-                            }
-                        }, (err, response, buffer) => {
-                            if(Buffer.isBuffer(buffer)){
-                                callback(null, {
-                                    buffer: buffer,
-                                    time: val.time,
-                                    url: val.pic
-                                });
-                            }
-                            else{
-                                callback(null,null);
-                            }
+        const fetchDate = (qid=2563280140,fetchIndex) =>{
+          return new Promise((resolve,reject) => {
+            options.url=getShuoshuoUrl(qid);//默认值爱服务本部的qq号
+            request(options, (err, response) => {
+                const msg = JSON.parse(response.body.slice(17, -2)).msglist;
+                info = msg.map(function (val) {
+                    if (val.pic) {
+                        let temp = val.pic.map(function (val, index) {
+                            return val.pic_id;
                         });
-                    }, (err, result) => {
-                        result = result.filter(val =>{if(val === null){return false}else{return true}});
-                        console.log('buffer fetched!');
-                        cb(null, result);//result 包含了 buffer time url 
-                    });
-                },(buffers,cb) => {
-                    async.map(buffers,(val,callback) => {
-                      sharp(val.buffer).resize(640).png().toBuffer().then(res => {
-                        callback(null,{
-                          png:res,
-                          time:val.time,
-                          url:val.url
-                        });
-                      })
-                    },(err,result) => {
-                      console.log('transcoded')
-                      cb(null,result);
-                    })
-                },
-                (pngs, cb) => {
-                    responseData = {
-                        ret: 201,
-                        desc: 'COLLECTING DATA',
-                        data: {
-                            currentTime: 0,
-                            lastUpdateTime:time(),
-                            count: 0,
-                            time: [],
-                            url: []
-                        },
+                        return {
+                            pic: temp,
+                            time: val.created_time,
+                        };
                     }
-                    async.map(pngs, (val, callback) => {
-                        console.log('comparing.....');
-                        // fs.writeFileSync('./temp/'+val.png.toString('base64').slice(0,17)+'.png',val.png);//测试使用的代码
-                        resemble(val.png).compareTo('./res/pao.png').scaleToSameSize().onComplete((result) => {
-                            if (parseInt(result.misMatchPercentage) <= 8) {
-                                console.log(val.png.toString('base64').slice(0, 17));
-                                console.log(result.misMatchPercentage);
-                                responseData.data.count++;
-                                responseData.data.time.push(val.time);
-                                responseData.data.url.push(val.url);
-                            } else {}
-                            callback(null, null);
-                        });
-                    }, (err, result) => {
-                        console.log('compared!');
-                        console.log(time());
-                        responseData.lastUpdateTime=time();
-                        responseData.ret = 200;
-                        responseData.desc = "success";
+                });
+                let temp = [];
+                info.forEach((val) => {
+                    if (val && val.pic) {
+                        val.pic.forEach((value) => {
+                            if (value) {
+                                temp.push({
+                                    pic: value,
+                                    time: val.time
+                                })
+                            }
+                        })
+                    }
+                })
+                info = temp;
+                console.log('start');
+                let fetch = Promise.all(
+                    info.map(val => {
+                        return new Promise((resolve,reject) => {
+                            request({
+                                url:val.pic,
+                                method:"GET",
+                                charset:"utf-8",
+                                encoding:null,
+                                headers: {
+                                    accept: "*/*",
+                                    "accept-language": "zh-CN,zh;q=0.9",
+                                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
+                                }
+                            },(err,response,buffer) => {
+                                if(Buffer.isBuffer(buffer)){
+                                    resolve({
+                                        buffer:buffer,
+                                        time:val.time,
+                                        url:val.pic
+                                    })
+                                }
+                                else{
+                                    resolve({
+                                        buffer:null,
+                                        time:val.time,
+                                        url:val.pic
+                                    })
+                                }
+                            })
+                        })
                     })
-                }
-            ], (err, result) => {})
-
-
+                )
+                fetch.then(res =>{
+                    res=res.filter(val => {if(val.buffer){return true}else{return false}})
+                    return Promise.all(
+                        res.map(val => {
+                            return new Promise((resolve,reject) => {
+                                sharp(val.buffer).resize(640).png().toBuffer().then(pngBuffer =>{
+                                    resolve({
+                                        png:pngBuffer,
+                                        time:val.time,
+                                        url:val.url
+                                    })
+                                })
+                            })
+                        })
+                    )
+                })
+                .then(pngBuffers => {
+                    console.log('comparing.....');
+                    return Promise.all(pngBuffers.map(val => {
+                        return new Promise((resolve,reject) => {
+                            resemble(val.png).compareTo('./res/pao.png').scaleToSameSize().onComplete(result => {
+                                if(parseInt(result.misMatchPercentage) <= 8){
+                                    console.log(val.png.toString('base64').slice(0,17));
+                                    console.log(result.misMatchPercentage);
+                                    if(fetchIndex === 1){
+                                      responseData.data.count++;
+                                      responseData.data.time.push(val.time);
+                                      responseData.data.url.push(val.url);
+                                    }
+                                    else{
+                                      responseData.data.count2++;
+                                      responseData.data.time2.push(val.time);
+                                      responseData.data.url2.push(val.url);
+                                    }
+                                }
+                                resolve(null);
+                            })
+                        })
+                    }))
+                })
+                .then(() => {
+                    resolve(null);
+                })
+            });
+          })
+        }
+        responseData = {
+            ret: 201,
+            desc: 'COLLECTING DATA',
+            data: {
+                currentTime: 0,
+                lastUpdateTime:time(),
+                count: 0,
+                time: [],
+                url: [],
+                count2:0,
+                time2:[],
+                url2:[],
+            },
+        }
+        Promise.all([fetchDate(2563280140,1),fetchDate(3493087686,2)])
+        .then(() => {
+          console.log("compared!");
+          console.log(time());
+          responseData.lastUpdateTime=time();
+          responseData.ret = 200;
+          responseData.desc = "success";
         });
     }
     update();
