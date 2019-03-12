@@ -1,6 +1,6 @@
-let cookieString =(cookie) => {
+let cookieString = (cookie) => {
   return cookie.map((val) => {
-      return val.name + "=" + val.value + ";";
+    return val.name + "=" + val.value + ";";
   }).toString().split(',').join('')
 };
 module.exports = cookieString;
