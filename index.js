@@ -26,6 +26,19 @@ let responseData = {
   }
 };
 
+Array.prototype._flatFunc= function(dep=1,flatArray=this){
+  if(Number.isNaN(Number(dep))||Number(dep)<1) return flatArray;
+  var curDep = 1;
+  function recursionFun(flatArray, dep, curDep){
+     return flatArray.reduce((acc,val) => (
+        Array.isArray(val)&&(dep === Infinity || curDep< dep)
+        ? acc.concat(_flatFunc(val, dep, curDep + 1))
+        : acc.concat(val)
+     ), []);
+  }
+  return recursionFun(flatArray, dep, curDep);
+}
+
 login.then(login => {
   console.log('Login success!');
 
@@ -58,8 +71,7 @@ login.then(login => {
         });
         //还应添加urlResponse.catch
         urlResponse.then(response => {
-          const msg = JSON.parse(response.body.slice(17, -2)).msglist;
-          info = msg.map(function (val) {
+          let info = JSON.parse(response.body.slice(17, -2)).msglist.map(function (val) {
             if (val.pic) {
               let temp = val.pic.map(function (val, index) {
                 return val.pic_id;
@@ -70,20 +82,25 @@ login.then(login => {
               };
             }
           });
-          let temp = [];
-          info.forEach((val) => {
-            if (val && val.pic) {
-              val.pic.forEach((value) => {
-                if (value) {
-                  temp.push({
-                    pic: value,
-                    time: val.time
-                  })
+          info = info.map((val) => {
+            if(val && val.pic){
+              return val.pic.map((value) => {
+                if(value){
+                  return {
+                    pic:value,
+                    time:val.time
+                  }
                 }
-              })
+                else{
+                  return null;
+                }
+              }).filter( val => {return val !== null});
             }
-          })
-          info = temp;
+            else{
+              return null;
+            }
+          }).filter(val =>{return val !== null})._flatFunc();
+
           console.log('start');
           let fetch = Promise.all(
             info.map(val => {
