@@ -20,7 +20,7 @@ let responseData = {
   data: {
     currentTime: 0,
     lastUpdateTime: 0,
-    count: 0,
+    // count: 0,
     time: [],
     url: []
   }
@@ -199,47 +199,48 @@ login.then(login => {
               }))
             })
             .then(res => {
-              responseData = {
-                ret: 200,
-                desc: 'COLLECTING DATA',
-                data: {
-                  currentTime: 0,
-                  lastUpdateTime: time(),
-                  count: 0,
-                  time: [],
-                  url: [],
-                  content:[],
-                  count2: 0,
-                  time2: [],
-                  url2: [],
-                  content2:[]
-                },
-              }
-              res.filter(val => val!==null).map(val => {
-                if(val.type === 1){
-                  responseData.data.time.push(val.time);
-                  responseData.data.url.push(val.url);
-                  responseData.data.content.push(val.content);
-                }
-                else{
-                  responseData.data.time2.push(val.time);
-                  responseData.data.url2.push(val.url);
-                  responseData.data.content2.push(val.content);
-                }
-              })
-              responseData.desc='SUCCESS';
-              resolve(null);
+              resolve(res.filter(val => val!==null));
             })
         })
       })
     }
     Promise.all([fetchDate(2563280140, 1), fetchDate(3493087686, 2)])
-    .then(() => {
+    .then(res => {
+      responseData = {
+        ret: 200,
+        desc: 'COLLECTING DATA',
+        data: {
+          currentTime: 0,
+          lastUpdateTime: time(),
+          // count: 0,
+          time: [],
+          url: [],
+          content:[],
+          // count2: 0,
+          time2: [],
+          url2: [],
+          content2:[]
+        },
+      }
+      res=res._flatFunc();
+      res.map(val => {
+        if(val.type === 1){
+          responseData.data.time.push(val.time);
+          responseData.data.url.push(val.url);
+          responseData.data.content.push(val.content);
+        }
+        else{
+          responseData.data.time2.push(val.time);
+          responseData.data.url2.push(val.url);
+          responseData.data.content2.push(val.content);
+        }
+      })
+      responseData.desc='SUCCESS';
       console.log("compared!");
       console.log(time());
       responseData.lastUpdateTime = time();
       responseData.ret = 200;
-      responseData.desc = "success";
+      // responseData.desc = "success";
     });
   }
   update();
