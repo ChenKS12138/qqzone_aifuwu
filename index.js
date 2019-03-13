@@ -65,7 +65,6 @@ login.then(login => {
         options.url = getShuoshuoUrl(qid); //默认值爱服务本部的qq号
         new Promise((resolve, reject) => {
           request(options, (err, response) => {
-            console.log(JSON.parse(response.body.slice(17, -2)).msglist);
             let body = JSON.parse(response.body.slice(17, -2));
             if(body.code === -3000){
               reject(body);
