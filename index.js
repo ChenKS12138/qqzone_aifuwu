@@ -48,7 +48,6 @@ login.then(login => {
   const getShuoshuoUrl = (qid = 2563280140) => {
     return `https://user.qzone.qq.com/proxy/domain/taotao.qq.com/cgi-bin/emotion_cgi_msglist_v6?uin=${qid}&ftype=0&sort=0&pos=0&num=20&replynum=100&g_tk=` + getGTK(p_skey(cookie)) + "&callback=_preloadCallback&code_version=1&format=jsonp&need_private_comment=1&g_tk=" + getGTK(p_skey(cookie))
   };
-
   const options = {
     method: 'GET',
     charset: "utf-8",
@@ -64,14 +63,23 @@ login.then(login => {
     const fetchDate = (qid = 2563280140, fetchIndex) => {
       return new Promise((resolve, reject) => {
         options.url = getShuoshuoUrl(qid); //默认值爱服务本部的qq号
-        let urlResponse = new Promise((resolve, reject) => {
+        new Promise((resolve, reject) => {
           request(options, (err, response) => {
-            resolve(response); //此处还应添加异常处理的代码 reject 
+            console.log(JSON.parse(response.body.slice(17, -2)).msglist);
+            let body = JSON.parse(response.body.slice(17, -2));
+            if(body.code === -3000){
+              reject(body);
+            }
+            else{
+              resolve(body);
+            }
           })
-        });
-        //还应添加urlResponse.catch
-        urlResponse.then(response => {
-          let info = JSON.parse(response.body.slice(17, -2)).msglist.map(function (val) {
+        })
+        .catch(err => {
+          console.log(err)
+        })
+        .then(body => {
+          let info =  body.msglist.map(function (val) {
             if (val.pic) {
               let temp = val.pic.map(function (val, index) {
                 return val.pic_id;
@@ -79,16 +87,18 @@ login.then(login => {
               return {
                 pic: temp,
                 time: val.created_time,
+                content:val.content
               };
             }
-          });
-          info = info.map((val) => {
+          })
+          .map((val) => {
             if(val && val.pic){
               return val.pic.map((value) => {
                 if(value){
                   return {
                     pic:value,
-                    time:val.time
+                    time:val.time,
+                    content:val.content
                   }
                 }
                 else{
@@ -120,13 +130,15 @@ login.then(login => {
                     resolve({
                       buffer: buffer,
                       time: val.time,
-                      url: val.pic
+                      url: val.pic,
+                      content:val.content
                     })
                   } else {
                     resolve({
                       buffer: null,
                       time: val.time,
-                      url: val.pic
+                      url: val.pic,
+                      content:val.content
                     })
                   }
                 })
@@ -148,7 +160,8 @@ login.then(login => {
                       resolve({
                         png: pngBuffer,
                         time: val.time,
-                        url: val.url
+                        url: val.url,
+                        content:val.content
                       })
                     })
                   })
@@ -167,10 +180,12 @@ login.then(login => {
                         responseData.data.count++;
                         responseData.data.time.push(val.time);
                         responseData.data.url.push(val.url);
+                        responseData.data.content.push(val.content);
                       } else {
                         responseData.data.count2++;
                         responseData.data.time2.push(val.time);
                         responseData.data.url2.push(val.url);
+                        responseData.data.content2.push(val.content);
                       }
                     }
                     resolve(null);
@@ -193,9 +208,11 @@ login.then(login => {
         count: 0,
         time: [],
         url: [],
+        content:[],
         count2: 0,
         time2: [],
         url2: [],
+        content2:[]
       },
     }
     Promise.all([fetchDate(2563280140, 1), fetchDate(3493087686, 2)])
