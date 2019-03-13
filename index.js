@@ -102,7 +102,7 @@ login.then(login => {
           }).filter(val =>{return val !== null})._flatFunc();
 
           console.log('start');
-          let fetch = Promise.all(
+          Promise.all(
             info.map(val => {
               return new Promise((resolve, reject) => {
                 request({
@@ -133,7 +133,7 @@ login.then(login => {
               })
             })
           )
-          fetch.then(res => {
+          .then(res => {
               res = res.filter(val => {
                 if (val.buffer) {
                   return true
