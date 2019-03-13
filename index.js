@@ -15,8 +15,8 @@ let login = Login(true, userinfo.u, userinfo.p);
 const serviceStartTime = time();
 
 let responseData = {
-  ret: 200,
-  desc: 'success',
+  ret: 201,
+  desc: 'INIT',
   data: {
     currentTime: 0,
     lastUpdateTime: 0,
@@ -176,43 +176,62 @@ login.then(login => {
                       console.log(val.png.toString('base64').slice(0, 17));
                       console.log(result.misMatchPercentage);
                       if (fetchIndex === 1) {
-                        responseData.data.count++;
-                        responseData.data.time.push(val.time);
-                        responseData.data.url.push(val.url);
-                        responseData.data.content.push(val.content);
+                        resolve({
+                          type:1,
+                          time:val.time,
+                          url:val.url,
+                          content:val.content
+                        })
                       } else {
-                        responseData.data.count2++;
-                        responseData.data.time2.push(val.time);
-                        responseData.data.url2.push(val.url);
-                        responseData.data.content2.push(val.content);
+                        resolve({
+                          type:2,
+                          time:val.time,
+                          url:val.url,
+                          content:val.content
+                        })
                       }
                     }
-                    resolve(null);
+                    else{
+                      resolve(null);
+                    }
                   })
                 })
               }))
             })
-            .then(() => {
+            .then(res => {
+              responseData = {
+                ret: 200,
+                desc: 'COLLECTING DATA',
+                data: {
+                  currentTime: 0,
+                  lastUpdateTime: time(),
+                  count: 0,
+                  time: [],
+                  url: [],
+                  content:[],
+                  count2: 0,
+                  time2: [],
+                  url2: [],
+                  content2:[]
+                },
+              }
+              res.filter(val => val!==null).map(val => {
+                if(val.type === 1){
+                  responseData.data.time.push(val.time);
+                  responseData.data.url.push(val.url);
+                  responseData.data.content.push(val.content);
+                }
+                else{
+                  responseData.data.time2.push(val.time);
+                  responseData.data.url2.push(val.url);
+                  responseData.data.content2.push(val.content);
+                }
+              })
+              responseData.desc='SUCCESS';
               resolve(null);
             })
         })
       })
-    }
-    responseData = {
-      ret: 201,
-      desc: 'COLLECTING DATA',
-      data: {
-        currentTime: 0,
-        lastUpdateTime: time(),
-        count: 0,
-        time: [],
-        url: [],
-        content:[],
-        count2: 0,
-        time2: [],
-        url2: [],
-        content2:[]
-      },
     }
     Promise.all([fetchDate(2563280140, 1), fetchDate(3493087686, 2)])
     .then(() => {
