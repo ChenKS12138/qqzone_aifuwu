@@ -32,8 +32,8 @@ const browser = await puppeteer.launch({
     });
 ```
 
-由于 images 这个依赖对 node 版本有要求[github_images](https://github.com/zhangyuanwei/node-images)
-推荐安装 node v8。v11 可能对 images 兼容性不好,小于 v7.8 版本的 node 不支持 async/await 语法
+~~由于 images 这个依赖对 node 版本有要求[github_images](https://github.com/zhangyuanwei/node-images)~~
+推荐安装 node v8及以上版本,小于 v7.8 版本的 node 不支持 async/await 语法
 
 ##我是否可以选择不扫码登录
 这是可以的，这需要在项目的根目录下新建 config.json,并填入账号和密码
