@@ -223,18 +223,30 @@ login.then(login => {
         },
       }
       res=res._flatFunc();
+      let tempTime=[];
+      let tempUrl=[];
+      let tempContent=[];
+      let tempTime2=[];
+      let tempUrl2=[];
+      let tempContent2=[];
       res.map(val => {
         if(val.type === 1){
-          responseData.data.time.push(val.time);
-          responseData.data.url.push(val.url);
-          responseData.data.content.push(val.content);
+          tempTime.push(val.time);
+          tempUrl.push(val.url);
+          tempContent.push(val.content);
         }
         else{
-          responseData.data.time2.push(val.time);
-          responseData.data.url2.push(val.url);
-          responseData.data.content2.push(val.content);
+          tempTime2.push(val.time);
+          tempUrl2.push(val.url);
+          tempContent2.push(val.content);
         }
       })
+      responseData.data.time=tempTime;
+      responseData.data.url=tempUrl;
+      responseData.data.content=tempContent;
+      responseData.data.time2=tempTime2;
+      responseData.data.url2=tempUrl2;
+      responseData.data.content2=tempContent2;
       responseData.desc='SUCCESS';
       console.log("compared!");
       console.log(time());
