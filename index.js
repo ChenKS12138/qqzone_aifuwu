@@ -250,7 +250,6 @@ login.then(login => {
       responseData.desc='SUCCESS';
       console.log("compared!");
       console.log(time());
-      responseData.lastUpdateTime = time();
       responseData.ret = 200;
       // responseData.desc = "success";
     });
